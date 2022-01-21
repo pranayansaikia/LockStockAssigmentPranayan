@@ -7,7 +7,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.pranayan.lockstockassigmentpranayan.adapter.MovieAdapter;
 import com.pranayan.lockstockassigmentpranayan.model.Result;
@@ -37,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     int pastVisiblesItems, visibleItemCount, totalItemCount;
 
     LinearLayoutManager mLayoutManager;
+    TextView load;
 
 
     @Override
@@ -46,10 +50,13 @@ public class MainActivity extends AppCompatActivity {
         //if (resultArrayList.size() > 0)
          //  resultArrayList.clear();
         recyclerView = findViewById(R.id.recyclerView);
+        load = findViewById(R.id.load);
+        load.setVisibility(View.GONE);
 
-        initRetrofit();
+        //initRetrofit();
         //initAdapter();
         pagination();
+        initRetrofit();
     }
 
     private void pagination() {
@@ -58,24 +65,28 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (dy > 0) { //check for scroll down
+               // if (dy > 0) { //check for scroll down
                     visibleItemCount = mLayoutManager.getChildCount();
                     totalItemCount = mLayoutManager.getItemCount();
                     pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
                     Log.e("visible", "pagination " + visibleItemCount + totalItemCount + pastVisiblesItems);
-                    if (loading) {
+
+                    if (!loading) {
                         if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
-                            loading = false;
+                           // loading = false;
+                            load.setVisibility(View.VISIBLE);
+
                             page++;
                             Log.e("...", "Last Item Wow !" + page);
-                            //Toast.makeText(getApplicationContext(), "No more data to load!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), "No more data to load!", Toast.LENGTH_SHORT).show();
                             // Do pagination.. i.e. fetch new data
                             //_loadAPI_POST();
-                            //initRetrofit();
+                            initRetrofit();
 
                         }
                     }
-                }
+               //}
+                super.onScrolled(recyclerView, dx, dy);
             }
         });
     }
@@ -83,6 +94,8 @@ public class MainActivity extends AppCompatActivity {
     private void initAdapter() {
         movieAdapter = new MovieAdapter(this,resultArrayList);
         recyclerView.setAdapter(movieAdapter);
+        movieAdapter.notifyDataSetChanged();
+
     }
 
     private void initRetrofit() {
@@ -96,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
                    Root root;
                    root=response.body();
                    Log.e("TAG","respine"+root.results.size());
-                   resultArrayList=root.results;
+                   resultArrayList.addAll(root.results);
 
                    initAdapter();
 
@@ -108,7 +121,8 @@ public class MainActivity extends AppCompatActivity {
 //                     resultArrayList.add(result);
 //                   }
                   // initAdapter();
-                   loading = true;
+                   loading = false;
+                   load.setVisibility(View.GONE);
 
                    //response.body().results.toString();
                }
