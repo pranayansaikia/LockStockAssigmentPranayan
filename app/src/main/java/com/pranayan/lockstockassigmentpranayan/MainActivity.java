@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.pranayan.lockstockassigmentpranayan.adapter.MovieAdapter;
 import com.pranayan.lockstockassigmentpranayan.model.Result;
@@ -57,11 +56,12 @@ public class MainActivity extends AppCompatActivity {
         //initAdapter();
         pagination();
         initRetrofit();
+        initAdapter();
+       // initRetrofit();
     }
 
     private void pagination() {
-        mLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(mLayoutManager);
+
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -75,10 +75,9 @@ public class MainActivity extends AppCompatActivity {
                         if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
                            // loading = false;
                             load.setVisibility(View.VISIBLE);
-
                             page++;
                             Log.e("...", "Last Item Wow !" + page);
-                            Toast.makeText(getApplicationContext(), "No more data to load!", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getApplicationContext(), "No more data to load!", Toast.LENGTH_SHORT).show();
                             // Do pagination.. i.e. fetch new data
                             //_loadAPI_POST();
                             initRetrofit();
@@ -92,9 +91,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initAdapter() {
+        mLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(mLayoutManager);
         movieAdapter = new MovieAdapter(this,resultArrayList);
         recyclerView.setAdapter(movieAdapter);
-        movieAdapter.notifyDataSetChanged();
+       // movieAdapter.notifyDataSetChanged();
 
     }
 
@@ -108,10 +109,12 @@ public class MainActivity extends AppCompatActivity {
                    assert response.body() != null;
                    Root root;
                    root=response.body();
-                   Log.e("TAG","respine"+root.results.size());
+                   Log.e("TAG","page"+root.page);
+                   Log.e("TAG","response"+root.results.size());
                    resultArrayList.addAll(root.results);
-
-                   initAdapter();
+                   Log.e("TAG","resultArrayList"+resultArrayList.size());
+                   //initAdapter();
+                   movieAdapter.notifyDataSetChanged();
 
                    Log.e("TAG","size"+resultArrayList.size());
                    //Log.e("TAG","size"+resultArrayList);
